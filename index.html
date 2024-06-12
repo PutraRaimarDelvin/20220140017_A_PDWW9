@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penjualan Obat Apotek</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #486d4d;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            position: relative;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #5c8a61;
+        }
+        nav a {
+            color: #fff;
+            padding: 14px 20px;
+            text-decoration: none;
+        }
+        nav a:hover {
+            background-color: #6fa773;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            background-image: url('apotik.JPEG'); 
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .container h2 {
+            text-align: center;
+        }
+        .medicine-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .medicine {
+            flex: 1 1 calc(33.333% - 40px);
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        .medicine img {
+            max-width: 100%;
+            height: auto;
+        }
+        .medicine h3 {
+            margin-top: 0;
+        }
+        .medicine .actions {
+            margin-top: 10px;
+        }
+        .contact-form {
+            margin-top: 20px;
+        }
+        .contact-form label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .contact-form input, .contact-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .contact-form button {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .contact-form button:hover {
+            background-color: #45a049;
+        }
+        .datetime {
+            position: absolute;
+            top: -40px; /* Jarak dari atas */
+            left: 50%;
+            transform: translateX(-50%); /* Untuk memposisikan di tengah */
+            font-size: 16px; /* Ukuran font yang sesuai */
+            color: #fff;
+            background-color: rgba(0, 0, 0, 0.5); /* Latar belakang semi-transparan */
+            padding: 5px 10px; /* Padding untuk estetika */
+            border-radius: 5px; /* Agar ujung lebih lembut */
+        }
+        .cart {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .cart h3 {
+            margin: 0 0 10px 0;
+        }
+        .cart ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .cart li {
+            margin-bottom: 5px;
+        }
+        .cart .cart-item {
+            display: flex;
+            justify-content: space-between;
+        }
+        .cart .cart-item button {
+            background-color: #ff4f4f;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .cart .cart-item button:hover {
+            background-color: #ff2f2f;
+        }
+        .payment-methods {
+            margin-top: 20px;
+        }
+        .payment-methods label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .payment-methods input {
+            margin-right: 10px;
+        }
+        .payment-methods button {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .payment-methods button:hover {
+            background-color: #45a049;
+        }
+        .datetime {
+            position: absolute;
+            top: 0; /* Jarak dari atas */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px; /* Ukuran font yang sesuai */
+            color: #fff;
+            background-color: rgba(0, 0, 0, 0.5); /* Latar belakang semi-transparan */
+            padding: 5px 10px; /* Padding untuk estetika */
+            border-radius: 5px; /* Agar ujung lebih lembut */
+        }
+    </style>
+    <script>
+        let cart = [];
+
+        function updateDateTime() {
+            const now = new Date();
+            const datetimeElement = document.getElementById('datetime');
+            const formattedDate = now.toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            const formattedTime = now.toLocaleTimeString('id-ID');
+            datetimeElement.textContent = formattedDate + ' ' + formattedTime; // Perbaikan di sini
+        }
+
+        function addToCart(medicineName, price) {
+            const quantityInput = document.getElementById('quantity-' + medicineName); // Perbaikan di sini
+            const quantity = parseInt(quantityInput.value);
+            if (quantity > 0) {
+                const item = cart.find(item => item.name === medicineName);
+                if (item) {
+                    item.quantity += quantity;
+                } else {
+                    cart.push({ name: medicineName, price, quantity });
+                }
+                quantityInput.value = 1;
+                updateCart();
+            }
+        }
+
+        function removeFromCart(medicineName) {
+            cart = cart.filter(item => item.name !== medicineName);
+            updateCart();
+        }
+
+        function updateCart() {
+            const cartElement = document.getElementById('cart-items');
+            cartElement.innerHTML = '';
+            cart.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'cart-item';
+                li.innerHTML = `${item.name} - ${item.quantity} pcs (Rp. ${item.price * item.quantity}) 
+                    <button onclick="removeFromCart('${item.name}')">Batalkan</button>`;
+                cartElement.appendChild(li);
+            });
+        }
+
+        function proceedToPayment() {
+            const selectedPaymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+            alert('Anda memilih metode pembayaran: ' + selectedPaymentMethod); // Perbaikan di sini
+        }
+
+        setInterval(updateDateTime, 1000);
+    </script>
+</head>
+<body>
+
+<header>
+    <h1>Apotek DELTA</h1>
+    <div id="datetime" class="datetime"></div>
+</header>
+
+<nav>
+    <a href="#">Home</a>
+    <a href="#">Obat</a>
+    <a href="#">Keranjang Belanja</a>
+    <a href="#">Kontak</a>
+</nav>
+
+<div class="container">
+    <h2>Daftar Obat Kami</h2>
+    <div class="medicine-list">
+        <div class="medicine">
+            <img src="paracetamol.jpeg" alt="Paracetamol">
+            <h3>Paracetamol</h3>
+            <p>Harga: Rp. 15,000</p>
+            <p>Deskripsi: Obat penurun demam dan pereda nyeri.</p>
+            <div class="actions">
+                <input type="number" id="quantity-Paracetamol" value="1" min="1">
+                <button onclick="addToCart('Paracetamol', 10000)">Beli</button>
+            </div>
+        </div>
+        <div class="medicine">
+            <img src="amoxcilin.jpeg" alt="Amoxicillin">
+            <h3>Amoxicillin</h3>
+            <p>Harga: Rp. 25,000</p>
+            <p>Deskripsi: Antibiotik untuk mengobati berbagai infeksi bakteri.</p>
+            <div class="actions">
+                <input type="number" id="quantity-Amoxicillin" value="1" min="1">
+                <button onclick="addToCart('Amoxicillin', 25000)">Beli</button>
+            </div>
+        </div>
+        <div class="medicine">
+            <img src="vitamin c.jpeg" alt="Vitamin C">
+            <h3>Vitamin C</h3>
+            <p>Harga: Rp. 15,000</p>
+            <p>Deskripsi: Suplemen untuk meningkatkan daya tahan tubuh.</p>
+            <div class="actions">
+                <input type="number" id="quantity-VitaminC" value="1" min="1">
+                <button onclick="addToCart('Vitamin C', 15000)">Beli</button>
+            </div>
+        </div>
+    </div>
+
+    <h2>Hubungi Kami</h2>
+    <div class="contact-form">
+        <form action="#" method="post">
+            <label for="name">Nama:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="message">Pesan:</label>
+            <textarea id="message" name="message" rows="5" required></textarea>
+
+            <button type="submit">Kirim</button>
+        </form>
+    </div>
+</div>
+
+<div class="cart">
+    <h3>Keranjang Belanja</h3>
+    <ul id="cart-items"></ul>
+    <div class="payment-methods">
+        <h3>Metode Pembayaran</h3>
+        <label><input type="radio" name="payment-method" value="QRIS"> QRIS</label>
+        <label><input type="radio" name="payment-method" value="ATM BRI"> ATM BRI</label>
+        <label><input type="radio" name="payment-method" value="ATM BCA"> ATM BCA</label>
+        <label><input type="radio" name="payment-method" value="ATM Mandiri"> ATM Mandiri</label>
+        <label><input type="radio" name="payment-method" value="Indomaret"> Indomaret</label>
+        <label><input type="radio" name="payment-method" value="Alfamart"> Alfamart</label>
+        <button onclick="proceedToPayment()">Lanjutkan Pembayaran</button>
+    </div>
+</div>
+
+</body>
+</html>
